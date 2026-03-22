@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CIFAR-10 Image Classifier</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f7fa;
+            color: #1a1a2e;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 60px 20px;
+        }
+
+        .container { max-width: 560px; width: 100%; }
+
+        h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 4px; }
+
+        .subtitle { color: #6b7280; font-size: 0.95rem; margin-bottom: 28px; }
+
+        .drop-zone {
+            border: 2px dashed #d1d5db;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+            margin-bottom: 24px;
+            background: #fff;
+        }
+
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: #f59e0b;
+            background: #fffbeb;
+        }
+
+        .drop-zone p { color: #6b7280; font-size: 0.95rem; }
+        .drop-zone .icon { font-size: 2rem; margin-bottom: 8px; }
+
+        .preview-container {
+            display: none;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .preview-container.visible { display: block; }
+
+        .preview-container img {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+            image-rendering: pixelated;
+        }
+
+        .preview-name {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-top: 6px;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: #f59e0b;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 24px;
+        }
+
+        button:hover { background: #d97706; }
+        button:disabled { background: #fcd34d; cursor: not-allowed; }
+
+        .result {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            display: none;
+        }
+
+        .result.visible { display: block; }
+
+        .top-label {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            text-transform: capitalize;
+        }
+
+        .top-confidence {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+        }
+
+        .bar-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .bar-row .class-name {
+            width: 100px;
+            font-size: 0.85rem;
+            text-transform: capitalize;
+            color: #374151;
+        }
+
+        .bar-row .bar-track {
+            flex: 1;
+            height: 10px;
+            background: #f3f4f6;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 0 10px;
+        }
+
+        .bar-row .bar-fill {
+            height: 100%;
+            background: #f59e0b;
+            border-radius: 5px;
+            transition: width 0.4s ease;
+        }
+
+        .bar-row .pct {
+            width: 50px;
+            text-align: right;
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        .error { color: #dc2626; font-weight: 600; margin-bottom: 12px; display: none; }
+        .error.visible { display: block; }
+
+        .tech-note {
+            margin-top: 32px;
+            font-size: 0.8rem;
+            color: #9ca3af;
+            text-align: center;
+        }
+
+        .classes-hint {
+            font-size: 0.82rem;
+            color: #9ca3af;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CIFAR-10 Image Classifier</h1>
+        <p class="subtitle">ResNet-20 trained from scratch &mdash; drop an image and see the prediction.</p>
+        <p class="classes-hint">Classes: airplane, automobile, bird, cat, deer, dog, frog, horse, ship, truck</p>
+
+        <div class="drop-zone" id="dropZone">
+            <div class="icon">&#128247;</div>
+            <p>Drop an image here or click to browse</p>
+        </div>
+        <input type="file" id="fileInput" accept="image/*" style="display:none">
+
+        <div class="preview-container" id="previewContainer">
+            <img id="previewImg" alt="preview">
+            <p class="preview-name" id="previewName"></p>
+        </div>
+
+        <button id="classifyBtn" onclick="submitClassification()" disabled>Classify</button>
+
+        <p class="error" id="errorMsg"></p>
+
+        <div class="result" id="resultCard">
+            <p class="top-label" id="topLabel"></p>
+            <p class="top-confidence" id="topConfidence"></p>
+            <div id="barsContainer"></div>
+        </div>
+
+        <p class="tech-note">
+            ResNet-20 (~272K params) built from scratch &bull;
+            Trained on CIFAR-10 (50K images) &bull;
+            <a href="/health" style="color:#9ca3af">API health</a>
+        </p>
+    </div>
+
+    <script>
+        var dropZone = document.getElementById("dropZone");
+        var fileInput = document.getElementById("fileInput");
+        var previewContainer = document.getElementById("previewContainer");
+        var previewImg = document.getElementById("previewImg");
+        var previewName = document.getElementById("previewName");
+        var classifyBtn = document.getElementById("classifyBtn");
+        var resultCard = document.getElementById("resultCard");
+        var errorMsg = document.getElementById("errorMsg");
+        var selectedFile = null;
+
+        dropZone.addEventListener("click", function() { fileInput.click(); });
+
+        dropZone.addEventListener("dragover", function(e) {
+            e.preventDefault();
+            dropZone.classList.add("dragover");
+        });
+
+        dropZone.addEventListener("dragleave", function() {
+            dropZone.classList.remove("dragover");
+        });
+
+        dropZone.addEventListener("drop", function(e) {
+            e.preventDefault();
+            dropZone.classList.remove("dragover");
+            if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
+        });
+
+        fileInput.addEventListener("change", function() {
+            if (fileInput.files.length > 0) handleFile(fileInput.files[0]);
+        });
+
+        function handleFile(file) {
+            if (!file.type.startsWith("image/")) {
+                errorMsg.textContent = "Please select an image file.";
+                errorMsg.className = "error visible";
+                return;
+            }
+            selectedFile = file;
+            errorMsg.className = "error";
+
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                previewName.textContent = file.name;
+                previewContainer.className = "preview-container visible";
+                classifyBtn.disabled = false;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function submitClassification() {
+            if (!selectedFile) return;
+
+            classifyBtn.disabled = true;
+            classifyBtn.textContent = "Classifying...";
+            errorMsg.className = "error";
+
+            var formData = new FormData();
+            formData.append("file", selectedFile);
+
+            fetch("/predict", { method: "POST", body: formData })
+            .then(function(res) {
+                if (!res.ok) throw new Error("Server returned " + res.status);
+                return res.json();
+            })
+            .then(function(data) {
+                document.getElementById("topLabel").textContent = data.label;
+                document.getElementById("topConfidence").textContent =
+                    (data.confidence * 100).toFixed(1) + "% confidence";
+
+                var barsHTML = "";
+                data.top5.forEach(function(item) {
+                    var pct = (item.probability * 100).toFixed(1);
+                    barsHTML += '<div class="bar-row">' +
+                        '<span class="class-name">' + item.class + '</span>' +
+                        '<div class="bar-track"><div class="bar-fill" style="width:' + pct + '%"></div></div>' +
+                        '<span class="pct">' + pct + '%</span>' +
+                        '</div>';
+                });
+                document.getElementById("barsContainer").innerHTML = barsHTML;
+                resultCard.className = "result visible";
+            })
+            .catch(function(err) {
+                errorMsg.textContent = "Error: " + err.message;
+                errorMsg.className = "error visible";
+            })
+            .finally(function() {
+                classifyBtn.disabled = false;
+                classifyBtn.textContent = "Classify";
+            });
+        }
+    </script>
+</body>
+</html>

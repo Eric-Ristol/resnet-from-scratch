@@ -1,0 +1,15 @@
+# Python libraries for ResNet-from-scratch (CIFAR-10).
+# Install with:
+#     python -m venv .venv && source .venv/bin/activate
+#     pip install -r requirements.txt
+#
+# Or reuse the shared venv at ../venv-all/ if it exists.
+
+torch>=2.1
+torchvision>=0.16
+numpy>=1.24
+matplotlib>=3.7
+pytest>=7
+fastapi
+uvicorn[standard]
+pillow
