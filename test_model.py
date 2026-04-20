@@ -1,13 +1,4 @@
 #Pytest checks for the ResNet-20 implementation.
-#
-#These run in a fraction of a second (no dataset, no training) and catch
-#the most common "I changed the model and forgot something" bugs:
-#  - output shape mismatch
-#  - parameter count drift
-#  - wrong dtype on the forward pass
-#  - BatchNorm not respecting train/eval mode
-#  - identity shortcut still working when channels change
-
 import pytest
 import torch
 

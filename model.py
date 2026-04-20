@@ -1,36 +1,20 @@
 #ResNet-20 for CIFAR-10, built from scratch.
-#
 #Based on: "Deep Residual Learning for Image Recognition" (He et al., 2015)
 #https://arxiv.org/abs/1512.03385
-#
-#--- The core idea ---
-#A plain deep network tries to learn some mapping y = H(x) directly.
-#A residual block instead learns F(x) = H(x) - x, and outputs:
-#
 #       y = F(x, {W_i}) + x
-#
 #The `+ x` is the "identity shortcut". If the optimal mapping is close to
 #identity (very common for nearby layers), the block only has to push F(x)
-#toward zero — much easier than learning identity from scratch with nonlinear
+#toward zero -- much easier than learning identity from scratch with nonlinear
 #layers. Empirically this lets us train nets that are 100+ layers deep without
 #vanishing gradients hurting the optimisation.
-#
-#--- Architecture (CIFAR-10 variant from the paper, Table 6) ---
 #      layer name   output size      ResNet-20
-#      ----------   -----------      ---------
 #      conv1        32 x 32 x 16     3x3, 16 filters, stride 1
 #      conv2_x      32 x 32 x 16     3 x BasicBlock(16)
 #      conv3_x      16 x 16 x 32     3 x BasicBlock(32)   (first block has stride 2)
 #      conv4_x      8  x 8  x 64     3 x BasicBlock(64)   (first block has stride 2)
 #      avgpool      1  x 1  x 64     global average pool
 #      fc           10               fully-connected to 10 classes
-#
 #Total parameters: ~272K.
-#
-#Shortcut type: we use "option A" (zero-padded identity) when the block
-#changes the number of channels. It's parameter-free, keeps the "from scratch"
-#spirit, and matches what He et al. used in the original CIFAR experiments.
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -63,7 +47,6 @@ class BasicBlock(nn.Module):
         self.stride       = stride
 
     def _shortcut(self, x):
-        #Option A shortcut: downsample spatially with avg-pool if stride>1,
         #then zero-pad the channel dimension if we grew wider. No parameters.
         if self.stride != 1:
             x = F.avg_pool2d(x, kernel_size=1, stride=self.stride)
@@ -133,7 +116,7 @@ class ResNetCifar(nn.Module):
 
 
 def resnet20(num_classes=10):
-    #Factory helper — ResNet-20 is the canonical small CIFAR variant.
+    #Factory helper -- ResNet-20 is the canonical small CIFAR variant.
     return ResNetCifar(n=3, num_classes=num_classes)
 
 
@@ -143,5 +126,5 @@ def resnet32(num_classes=10):
 
 
 def count_parameters(model):
-    #Small utility — nice to print at train time and to check in tests.
+    #Small utility -- nice to print at train time and to check in tests.
     return sum(p.numel() for p in model.parameters() if p.requires_grad)

@@ -1,8 +1,7 @@
-#Evaluation — loads the best checkpoint and reports:
+#Evaluation -- loads the best checkpoint and reports:
 #  - top-1 test accuracy
 #  - per-class accuracy
 #  - a confusion matrix saved to plots/confusion_matrix.png
-#
 #Run with: python evaluate.py
 #Or from the main.py menu.
 
@@ -62,7 +61,7 @@ def plot_confusion(cm, out_path, classes=CLASSES):
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
     except Exception as e:
-        print("  (skipping plot — matplotlib not available:", e, ")")
+        print("  (skipping plot -- matplotlib not available:", e, ")")
         return
 
     #Row-normalise so the diagonal is "% of this true class predicted correctly".
@@ -76,7 +75,7 @@ def plot_confusion(cm, out_path, classes=CLASSES):
     ax.set_yticklabels(classes)
     ax.set_xlabel("predicted")
     ax.set_ylabel("true")
-    ax.set_title("ResNet-20 on CIFAR-10 — confusion matrix (row-normalised)")
+    ax.set_title("ResNet-20 on CIFAR-10 -- confusion matrix (row-normalised)")
     for i in range(len(classes)):
         for j in range(len(classes)):
             v = cm_norm[i, j]

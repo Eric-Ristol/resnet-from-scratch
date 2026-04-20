@@ -1,19 +1,12 @@
 #Training loop for ResNet-20 on CIFAR-10.
-#
 #Recipe (from the original ResNet paper, Sec. 4.2):
 #  - SGD, momentum 0.9, weight decay 1e-4
 #  - mini-batch size 128
 #  - learning rate 0.1, divided by 10 at epochs 80 and 120
 #  - train for 160 epochs total
 #  - weight init: He / Kaiming (done in model.py)
-#
 #For this educational reimplementation I default to:
 #  - epochs=80 (gets within ~1% of full recipe, half the time)
-#  - cosine LR schedule (slightly simpler than the paper's step decay,
-#    a tiny bit better accuracy, and a nicer smooth curve to show off
-#    in the README plot).
-#
-#On CPU a single epoch is ~4-6 minutes. On a modest GPU it's seconds.
 
 import argparse
 import os
@@ -98,10 +91,10 @@ def plot_history(history, out_path):
     #Saved as a PNG so it can be embedded in the README.
     try:
         import matplotlib
-        matplotlib.use("Agg")  #no display needed — saving to file only
+        matplotlib.use("Agg")  #no display needed -- saving to file only
         import matplotlib.pyplot as plt
     except Exception as e:
-        print("  (skipping plot — matplotlib not available:", e, ")")
+        print("  (skipping plot -- matplotlib not available:", e, ")")
         return
 
     epochs = list(range(1, len(history["train_loss"]) + 1))
@@ -131,7 +124,7 @@ def plot_history(history, out_path):
 def run_training(epochs=80, batch_size=128, lr=0.1, momentum=0.9,
                  weight_decay=1e-4, num_workers=2, tiny=False,
                  device=None, download=True):
-    #Full training routine. `tiny=True` runs on a small subset — useful
+    #Full training routine. `tiny=True` runs on a small subset -- useful
     #for unit tests and CI.
     device = device or pick_device()
     print("Device:", device)

@@ -1,15 +1,8 @@
 #FastAPI wrapper around the ResNet-20 CIFAR-10 classifier.
 #Loads the best checkpoint once at startup, classifies uploaded images.
-#
 #Run it:
 #   uvicorn api.app:app --reload
 #   (or pick the API option from main.py)
-#
-#Endpoints:
-#   GET  /           serves the drag-and-drop web page
-#   POST /predict    accepts an image file, returns top-5 classes + probabilities
-#   GET  /health     simple health check
-
 import os
 import sys
 import io
@@ -39,7 +32,7 @@ app = FastAPI(
 STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
-#Global model — loaded once at startup.
+#Global model -- loaded once at startup.
 model = None
 device = None
 transform = None
@@ -91,7 +84,6 @@ async def predict_image(file: UploadFile = File(...)):
     with torch.no_grad():
         probs = torch.softmax(model(x), dim=1)[0]
 
-    #Build top-5 results.
     top5_probs, top5_indices = torch.topk(probs, 5)
     predictions = []
     for i in range(5):

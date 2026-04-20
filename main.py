@@ -1,14 +1,5 @@
-#Main entry point — small Roman-numeral menu, same style as the other
+#Main entry point -- small Roman-numeral menu, same style as the other
 #projects in this folder.
-#
-#Options:
-#  I.   Download CIFAR-10 (first-time setup)
-#  II.  Train ResNet-20
-#  III. Train a tiny smoke-run (~256 images, 1 epoch)
-#  IV.  Evaluate the best checkpoint
-#  V.   Predict on a single image file
-#  VI.  Quit
-
 import os
 import sys
 
@@ -16,7 +7,7 @@ import sys
 def print_menu():
     print("")
     print("================================================")
-    print("   RESNET-20 / CIFAR-10 — Main menu")
+    print("   RESNET-20 / CIFAR-10 -- Main menu")
     print("================================================")
     print("  I.   Download CIFAR-10")
     print("  II.  Train ResNet-20 (80 epochs)")

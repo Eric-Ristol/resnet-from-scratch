@@ -1,16 +1,12 @@
 #CIFAR-10 data pipeline.
-#
 #CIFAR-10 has 60,000 32x32 colour images in 10 classes:
 #  airplane, automobile, bird, cat, deer, dog, frog, horse, ship, truck.
 #Standard split is 50,000 train / 10,000 test.
-#
 #Training-time augmentation (same recipe as the original ResNet paper
 #for CIFAR): pad the 32x32 image with 4 pixels of zeros, random-crop
 #back to 32x32, and random horizontal flip. Eval-time: no augmentation.
-#
 #Normalisation uses the per-channel mean/std of CIFAR-10's training set.
 #These numbers are standard across every ResNet-on-CIFAR codebase;
-#computing them ourselves would be fine but adds a step for a fixed dataset.
 
 import os
 
@@ -64,7 +60,7 @@ def get_datasets(download=True):
 
 
 def get_loaders(batch_size=128, num_workers=2, download=True):
-    #Returns (train_loader, test_loader). Workers default to 2 — the
+    #Returns (train_loader, test_loader). Workers default to 2 -- the
     #Trainer-style sweet spot for CIFAR on a laptop. Set to 0 on very
     #constrained machines.
     train_ds, test_ds = get_datasets(download=download)
