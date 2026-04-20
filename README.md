@@ -4,6 +4,8 @@ A clean, single-folder reimplementation of the CIFAR-10 ResNet from
 **Deep Residual Learning for Image Recognition** (He, Zhang, Ren & Sun, CVPR 2016
 — [arXiv:1512.03385](https://arxiv.org/abs/1512.03385)).
 
+**[Try the live demo on HuggingFace Spaces](https://huggingface.co/spaces/EricRistol/resnet-cifar10)**
+
 The goal of this project isn't to beat state-of-the-art — it's to go from the
 equations in the paper to working code, one layer at a time, with nothing
 imported from `torchvision.models`.
